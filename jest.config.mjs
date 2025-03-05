@@ -1,5 +1,6 @@
 /** @type {import('jest').Config} */
 const config = {
+  rootDir: "./tests",
   transform: {
     "\\.ts$": "oxjest",
   },
