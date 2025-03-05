@@ -1,4 +1,5 @@
 {
+  "baseBranch": "main",
   "changelog": [
     "@changesets/changelog-github",
     {

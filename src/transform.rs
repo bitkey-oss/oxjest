@@ -5,16 +5,12 @@ use base64::Engine;
 use base64::prelude::BASE64_STANDARD;
 use napi::bindgen_prelude::*;
 use oxc::allocator::Allocator;
-use oxc::ast::AstBuilder;
 use oxc::codegen::{CodeGenerator, CodegenOptions, CodegenReturn};
 use oxc_sourcemap::SourceMap;
+use oxc_traverse::traverse_mut;
 
 use crate::loader::Loader;
-use crate::pass::Pass;
-use crate::pass::dynamic_imports::DynamicImports;
-use crate::pass::hoist_mocks::HoistMocks;
-use crate::pass::import_actual::ImportActual;
-use crate::pass::inject_globals::InjectGlobals;
+use crate::pass::Transformer;
 
 pub(crate) fn _transform(
     source_text: String,
@@ -22,16 +18,13 @@ pub(crate) fn _transform(
 ) -> Result<crate::TransformedSource> {
     let source_path = PathBuf::from(source_path);
     let allocator = Allocator::new();
-    let mut program = Loader
+    let (mut program, symbols, scopes) = Loader
         .load_str(&allocator, &source_text, &source_path)
         .map_err(|_| Error::from_reason("Could not load a source file. Invalid syntax?"))?;
 
-    let ast = AstBuilder::new(&allocator);
+    let mut transformer = Transformer::new();
 
-    HoistMocks.process(&mut program, ast);
-    DynamicImports.process(&mut program, ast);
-    InjectGlobals.process(&mut program, ast);
-    ImportActual.process(&mut program, ast);
+    traverse_mut(&mut transformer, &allocator, &mut program, symbols, scopes);
 
     let CodegenReturn { mut code, map, .. } = CodeGenerator::new()
         .with_options(CodegenOptions {
@@ -62,4 +55,26 @@ pub(crate) fn _transform(
     BASE64_STANDARD.encode_string(map.as_bytes(), &mut code);
 
     Ok(crate::TransformedSource { code, map })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::path::Path;
+
+    fn test(source_path: &Path) {
+        let source_text = std::fs::read_to_string(source_path).unwrap();
+        let source_path = source_path
+            .file_name()
+            .unwrap()
+            .to_string_lossy()
+            .to_string();
+
+        let crate::TransformedSource { code, .. } =
+            _transform(source_text, source_path.clone()).unwrap();
+
+        insta::assert_snapshot!(source_path.as_str(), code);
+    }
+
+    test_each_file::test_each_path! { in "./tests" => test }
 }

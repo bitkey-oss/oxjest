@@ -1,0 +1,15 @@
+---
+source: src/transform.rs
+expression: code
+---
+import * as __oxjest__ from "oxjest/runtime";
+import.meta.jest.unstable_mockModule("./greeter", __oxjest__.createMockFactory(await import("./greeter")));
+const __oxjest_import_0__ = await import("./greeter"), greet = __oxjest_import_0__.greet;
+describe("Simple", () => {
+	it("mock a module", () => {
+		import.meta.jest.mocked(greet).mockReturnValueOnce("Hello from mocked module!");
+		expect(greet()).toBe("Hello from mocked module!");
+	});
+});
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6W10sInNvdXJjZXMiOlsic2ltcGxlLnRlc3QudHMiXSwibWFwcGluZ3MiOiI7QUFFQSxpQkFBSyxvQkFBSyxxRUFBWTtBQUZ0Qix5Q0FBc0IsY0FBYjtBQUlULFNBQVMsVUFBVSxNQUFNO0FBQ3ZCLElBQUcsaUJBQWlCLE1BQU07QUFDeEIsbUJBQUssT0FBTyxNQUFNLENBQUMsb0JBQW9CLDRCQUE0QjtBQUVuRSxTQUFPLE9BQU8sQ0FBQyxDQUFDLEtBQUssNEJBQTRCO0NBQ2xELEVBQUM7QUFDSCxFQUFDIn0=

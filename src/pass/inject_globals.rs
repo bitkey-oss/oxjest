@@ -1,11 +1,11 @@
 use oxc::allocator::Box;
 use oxc::ast::AstBuilder;
-use oxc::ast::ast::*;
-use oxc::ast_visit::VisitMut;
-use oxc::ast_visit::walk_mut::{walk_member_expression, walk_program};
+use oxc::ast::ast::{
+    Expression, IdentifierReference, ImportOrExportKind, MemberExpression, Program, Statement,
+    StaticMemberExpression,
+};
 use oxc::span::Span;
-
-use crate::pass::Pass;
+use oxc_traverse::{Traverse, TraverseCtx};
 
 const OXJEST_RUNTIME_ID: &str = "oxjest/runtime";
 const OXJEST_RUNTIME_NAME: &str = "__oxjest__";
@@ -45,21 +45,25 @@ fn make_import_meta_jest<'a>(
     )
 }
 
-struct InjectGlobalsVisitor<'a> {
-    ast: AstBuilder<'a>,
+pub(crate) struct InjectGlobals {}
+
+impl InjectGlobals {
+    pub(crate) fn new() -> Self {
+        Self {}
+    }
 }
 
-impl<'a> VisitMut<'a> for InjectGlobalsVisitor<'a> {
-    fn visit_program(&mut self, it: &mut Program<'a>) {
-        walk_program(self, it);
-
-        it.body.insert(0, make_runtime_import_stmt(self.ast));
+impl<'a> Traverse<'a> for InjectGlobals {
+    fn exit_program(&mut self, node: &mut Program<'a>, ctx: &mut TraverseCtx<'a>) {
+        node.body.insert(0, make_runtime_import_stmt(ctx.ast));
     }
 
-    fn visit_member_expression(&mut self, it: &mut MemberExpression<'a>) {
-        walk_member_expression(self, it);
-
-        let MemberExpression::StaticMemberExpression(expr) = it else {
+    fn enter_member_expression(
+        &mut self,
+        node: &mut MemberExpression<'a>,
+        ctx: &mut TraverseCtx<'a>,
+    ) {
+        let MemberExpression::StaticMemberExpression(expr) = node else {
             return;
         };
 
@@ -72,19 +76,9 @@ impl<'a> VisitMut<'a> for InjectGlobalsVisitor<'a> {
         }
 
         expr.object = MemberExpression::StaticMemberExpression(
-            self.ast.alloc(make_import_meta_jest(self.ast, ident)),
+            ctx.ast.alloc(make_import_meta_jest(ctx.ast, ident)),
         )
         .into();
-    }
-}
-
-pub(crate) struct InjectGlobals;
-
-impl Pass for InjectGlobals {
-    fn process<'a>(&mut self, program: &mut Program<'a>, ast: AstBuilder<'a>) {
-        let mut visitor = InjectGlobalsVisitor { ast };
-
-        visitor.visit_program(program);
     }
 }
 
@@ -92,6 +86,7 @@ impl Pass for InjectGlobals {
 mod tests {
     use super::*;
     use crate::testing::transform;
+    use oxc::allocator::Allocator;
 
     #[test]
     fn test_inject_globals() {
@@ -100,7 +95,8 @@ mod tests {
         jest.mock("./greeter.js");
         "#;
 
-        let code = transform(source_text, InjectGlobals);
+        let allocator = Allocator::new();
+        let code = transform(&allocator, source_text, InjectGlobals::new());
 
         insta::assert_snapshot!(code, @r#"
         import * as __oxjest__ from "oxjest/runtime";
