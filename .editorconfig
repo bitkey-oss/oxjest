@@ -11,7 +11,7 @@ max_line_length = 120
 [*.rs]
 indent_size = 4
 
-[*.{js,ts,yaml}]
+[*.{js,mjs,ts,yaml}]
 indent_size = 2
 
 [*.md]
