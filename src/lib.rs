@@ -14,6 +14,7 @@ pub struct TransformOptions<'scope> {
     pub resolver: Function<'scope, (String, String), String>,
 }
 
+#[derive(Debug)]
 #[napi(object)]
 pub struct TransformedSource {
     pub code: String,

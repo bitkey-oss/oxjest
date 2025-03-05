@@ -1,0 +1,28 @@
+---
+source: src/transform.rs
+expression: code
+---
+import * as __oxjest__ from "oxjest/runtime";
+import { jest } from "@jest/globals";
+import { createMockFactory } from "oxjest/runtime";
+describe("createMockFactory", () => {
+	it("create a mock for function", async () => {
+		const factory = createMockFactory({ greet() {
+			return "Hello, world!";
+		} });
+		const mock = factory();
+		expect(import.meta.jest.isMockFunction(mock.greet)).toBe(true);
+	});
+	it("create a mock for class", async () => {
+		class Greeter {
+			static greet() {
+				return "Hello, world!";
+			}
+		}
+		const factory = createMockFactory({ Greeter });
+		const mock = factory();
+		expect(import.meta.jest.isMockFunction(mock.Greeter.greet)).toBe(true);
+	});
+});
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6W10sInNvdXJjZXMiOlsicnVudGltZS50ZXN0LnRzIl0sIm1hcHBpbmdzIjoiO0FBQUEsU0FBUyxZQUFZLGVBQWdCO0FBQ3JDLFNBQVMseUJBQXlCLGdCQUFpQjtBQUVuRCxTQUFTLHFCQUFxQixNQUFNO0FBQ2xDLElBQUcsOEJBQThCLFlBQVk7RUFDM0MsTUFBTSxVQUFVLGtCQUFrQixFQUNoQyxRQUFnQjtBQUNkLFVBQU87RUFDUixFQUNGLEVBQUM7RUFFRixNQUFNLE9BQU8sU0FBUztBQUV0QixTQUFPLGlCQUFLLGVBQWUsS0FBSyxNQUFNLENBQUMsQ0FBQyxLQUFLLEtBQUs7Q0FDbkQsRUFBQztBQUVGLElBQUcsMkJBQTJCLFlBQVk7RUFDeEMsTUFBTSxRQUFRO0dBQ1osT0FBTyxRQUFnQjtBQUNyQixXQUFPO0dBQ1I7RUFDRjtFQUVELE1BQU0sVUFBVSxrQkFBa0IsRUFBRSxRQUFTLEVBQUM7RUFDOUMsTUFBTSxPQUFPLFNBQVM7QUFFdEIsU0FBTyxpQkFBSyxlQUFlLEtBQUssUUFBUSxNQUFNLENBQUMsQ0FBQyxLQUFLLEtBQUs7Q0FDM0QsRUFBQztBQUNILEVBQUMifQ==

@@ -56,3 +56,25 @@ pub(crate) fn _transform(
 
     Ok(crate::TransformedSource { code, map })
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::path::Path;
+
+    fn test(source_path: &Path) {
+        let source_text = std::fs::read_to_string(source_path).unwrap();
+        let source_path = source_path
+            .file_name()
+            .unwrap()
+            .to_string_lossy()
+            .to_string();
+
+        let crate::TransformedSource { code, .. } =
+            _transform(source_text, source_path.clone()).unwrap();
+
+        insta::assert_snapshot!(source_path.as_str(), code);
+    }
+
+    test_each_file::test_each_path! { in "./tests" => test }
+}

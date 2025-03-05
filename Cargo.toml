@@ -23,6 +23,7 @@ napi-build = "2.1.5"
 
 [dev-dependencies]
 insta = "1.42.2"
+test_each_file = "0.3.4"
 
 [profile.dev.package]
 insta.opt-level = 3

@@ -1,0 +1,15 @@
+---
+source: src/transform.rs
+expression: code
+---
+import * as __oxjest__ from "oxjest/runtime";
+const __oxjest_actual_0__ = await import("./greeter");
+import.meta.jest.unstable_mockModule("./greeter", () => ({ greet: () => "Hello from mocked module!" }));
+describe("requireActual", () => {
+	it("mock a module", () => {
+		const greeter = __oxjest_actual_0__;
+		expect(greeter.greet()).toBe("Hello, world!");
+	});
+});
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6WyJqZXN0LnJlcXVpcmVBY3R1YWwoXCIuL2dyZWV0ZXJcIikiXSwic291cmNlcyI6WyJyZXF1aXJlQWN0dWFsLnRlc3QudHMiXSwibWFwcGluZ3MiOiI7O0FBQUEsaUJBQUssb0JBQUssYUFBYSxPQUFPLEVBQzVCLE9BQU8sTUFBTSw0QkFDZCxHQUFFO0FBRUgsU0FBUyxpQkFBaUIsTUFBTTtBQUM5QixJQUFHLGlCQUFpQixNQUFNO0VBQ3hCLE1BQU0sVUFBVUE7QUFFaEIsU0FBTyxRQUFRLE9BQU8sQ0FBQyxDQUFDLEtBQUssZ0JBQWdCO0NBQzlDLEVBQUM7QUFDSCxFQUFDIn0=
