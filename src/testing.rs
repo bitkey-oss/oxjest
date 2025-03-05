@@ -2,23 +2,24 @@ use std::path::PathBuf;
 use std::str::FromStr;
 
 use oxc::allocator::Allocator;
-use oxc::ast::AstBuilder;
 use oxc::codegen::{CodeGenerator, CodegenReturn};
+use oxc_traverse::{Traverse, traverse_mut};
 
 use crate::loader::Loader;
-use crate::pass::Pass;
 
-pub(crate) fn transform<'a, P: Pass>(source_text: &str, mut pass: P) -> String {
+pub(crate) fn transform<'a>(
+    allocator: &'a Allocator,
+    source_text: &str,
+    mut traverser: impl Traverse<'a>,
+) -> String {
     let source_path = PathBuf::from_str("/path/to/source.js").unwrap();
 
-    let allocator = Allocator::new();
-    let mut program = Loader
+    let source_text = allocator.alloc_str(source_text);
+    let (mut program, symbols, scopes) = Loader
         .load_str(&allocator, source_text, &source_path)
         .unwrap();
 
-    let ast = AstBuilder::new(&allocator);
-
-    pass.process(&mut program, ast);
+    traverse_mut(&mut traverser, &allocator, &mut program, symbols, scopes);
 
     let CodegenReturn { code, .. } = CodeGenerator::new()
         .with_options(Default::default())

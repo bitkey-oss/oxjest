@@ -47,14 +47,3 @@ pub fn is_jest_mock_call(expr: &CallExpression) -> bool {
             if is_jest_object(&callee.object) && callee.property.name == MOCK
     )
 }
-
-/// Checks that the call expression is `jest.unstable_mockModule(...)`.
-pub fn is_jest_mock_module_call(expr: &CallExpression) -> bool {
-    const MOCK_MODULE: &str = "unstable_mockModule";
-
-    matches!(
-        &expr.callee,
-        Expression::StaticMemberExpression(callee)
-            if is_jest_object(&callee.object) && callee.property.name == MOCK_MODULE
-    )
-}

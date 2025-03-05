@@ -5,16 +5,12 @@ use base64::Engine;
 use base64::prelude::BASE64_STANDARD;
 use napi::bindgen_prelude::*;
 use oxc::allocator::Allocator;
-use oxc::ast::AstBuilder;
 use oxc::codegen::{CodeGenerator, CodegenOptions, CodegenReturn};
 use oxc_sourcemap::SourceMap;
+use oxc_traverse::traverse_mut;
 
 use crate::loader::Loader;
-use crate::pass::Pass;
-use crate::pass::dynamic_imports::DynamicImports;
-use crate::pass::hoist_mocks::HoistMocks;
-use crate::pass::import_actual::ImportActual;
-use crate::pass::inject_globals::InjectGlobals;
+use crate::pass::Transformer;
 
 pub(crate) fn _transform(
     source_text: String,
@@ -22,16 +18,13 @@ pub(crate) fn _transform(
 ) -> Result<crate::TransformedSource> {
     let source_path = PathBuf::from(source_path);
     let allocator = Allocator::new();
-    let mut program = Loader
+    let (mut program, symbols, scopes) = Loader
         .load_str(&allocator, &source_text, &source_path)
         .map_err(|_| Error::from_reason("Could not load a source file. Invalid syntax?"))?;
 
-    let ast = AstBuilder::new(&allocator);
+    let mut transformer = Transformer::new();
 
-    HoistMocks.process(&mut program, ast);
-    DynamicImports.process(&mut program, ast);
-    InjectGlobals.process(&mut program, ast);
-    ImportActual.process(&mut program, ast);
+    traverse_mut(&mut transformer, &allocator, &mut program, symbols, scopes);
 
     let CodegenReturn { mut code, map, .. } = CodeGenerator::new()
         .with_options(CodegenOptions {

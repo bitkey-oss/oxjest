@@ -760,6 +760,7 @@ dependencies = [
  "napi-derive",
  "oxc",
  "oxc_sourcemap",
+ "oxc_traverse",
 ]
 
 [[package]]

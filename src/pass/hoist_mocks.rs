@@ -1,11 +1,16 @@
-use oxc::allocator::{Box, CloneIn, Vec};
+use std::iter::once;
+use std::sync::atomic::{AtomicUsize, Ordering};
+
+use oxc::allocator::{Box, CloneIn, Vec as ArenaVec};
 use oxc::ast::AstBuilder;
-use oxc::ast::ast::{Argument, Expression, Program, Span, Statement};
-use oxc::ast_visit::VisitMut;
-use oxc::ast_visit::walk_mut::{walk_expression, walk_program, walk_statements};
+use oxc::ast::ast::{
+    Argument, BindingPatternKind, Expression, ImportDeclaration, ImportDeclarationSpecifier,
+    Program, Span, Statement, VariableDeclaration, VariableDeclarationKind,
+};
+use oxc::span::GetSpan;
+use oxc_traverse::{Traverse, TraverseCtx};
 
 use crate::jest::is_jest_mock_call;
-use crate::pass::Pass;
 
 fn make_create_mock_factory<'a>(ast: AstBuilder<'a>, id: &str) -> Expression<'a> {
     ast.expression_call(
@@ -34,28 +39,124 @@ fn make_create_mock_factory<'a>(ast: AstBuilder<'a>, id: &str) -> Expression<'a>
     )
 }
 
-struct HoistMocksVisitor<'a> {
+fn make_dynamic_import<'a>(
     ast: AstBuilder<'a>,
-    mocks: Vec<'a, Expression<'a>>,
+    decl: &ImportDeclaration<'a>,
+    import_name: &str,
+) -> VariableDeclaration<'a> {
+    // __oxjest_import_{}__ = await import("...")
+    let await_import = ast.variable_declarator(
+        Span::default(),
+        VariableDeclarationKind::Const,
+        ast.binding_pattern(
+            ast.binding_pattern_kind_binding_identifier(Span::default(), import_name),
+            Option::<Box<'a, _>>::None,
+            false,
+        ),
+        Some(ast.expression_await(
+            Span::default(),
+            ast.expression_import(
+                Span::default(),
+                ast.expression_string_literal(decl.source.span, decl.source.value, decl.source.raw),
+                ast.vec(),
+                None,
+            ),
+        )),
+        false,
+    );
+
+    // foo = __oxjest_import_{}__.foo, bar = __oxjest_import_{}__.default, ...
+    let declarations = decl.specifiers.iter().flatten().map(|specifier| {
+        ast.variable_declarator(
+            Span::default(),
+            VariableDeclarationKind::Const,
+            ast.binding_pattern(
+                BindingPatternKind::BindingIdentifier(
+                    ast.alloc(specifier.local().clone_in(ast.allocator)),
+                ),
+                Option::<Box<'a, _>>::None,
+                false,
+            ),
+            Some(match specifier {
+                ImportDeclarationSpecifier::ImportNamespaceSpecifier(_) => {
+                    ast.expression_identifier(Span::default(), import_name)
+                }
+                _ => ast
+                    .member_expression_static(
+                        Span::default(),
+                        ast.expression_identifier(Span::default(), import_name),
+                        match specifier {
+                            ImportDeclarationSpecifier::ImportDefaultSpecifier(specifier) => {
+                                ast.identifier_name(specifier.span, "default")
+                            }
+                            ImportDeclarationSpecifier::ImportSpecifier(specifier) => ast
+                                .identifier_name(
+                                    specifier.imported.span(),
+                                    specifier.imported.name(),
+                                ),
+                            _ => unreachable!(),
+                        },
+                        false,
+                    )
+                    .into(),
+            }),
+            false,
+        )
+    });
+
+    // const __oxjest_import_{}__ = await import("..."), foo = __oxjest_import_{}__.foo, ...;
+    ast.variable_declaration(
+        decl.span,
+        VariableDeclarationKind::Const,
+        ast.vec_from_iter(once(await_import).chain(declarations)),
+        false,
+    )
 }
 
-impl<'a> VisitMut<'a> for HoistMocksVisitor<'a> {
-    fn visit_program(&mut self, it: &mut Program<'a>) {
-        walk_program(self, it);
+pub(crate) struct HoistMocks<'a> {
+    mocks: Vec<Expression<'a>>,
+}
 
-        it.body.splice(
+impl HoistMocks<'_> {
+    pub(crate) fn new() -> Self {
+        Self { mocks: Vec::new() }
+    }
+}
+
+impl<'a> Traverse<'a> for HoistMocks<'a> {
+    fn exit_program(&mut self, node: &mut Program<'a>, ctx: &mut TraverseCtx<'a>) {
+        // Insert hoisted mocks at the top of the body
+        node.body.splice(
             0..0,
             self.mocks.iter().map(|mock_call| {
-                self.ast
-                    .statement_expression(Span::default(), mock_call.clone_in(self.ast.allocator))
+                ctx.ast
+                    .statement_expression(Span::default(), mock_call.clone_in(ctx.ast.allocator))
             }),
         );
+
+        // Imports don't need to be turned into dynamic imports if there are no mocks
+        if !self.mocks.is_empty() {
+            let import_id = AtomicUsize::new(0);
+
+            node.body.iter_mut().for_each(|stmt| {
+                let Statement::ImportDeclaration(decl) = stmt else {
+                    return;
+                };
+
+                let import_id = import_id.fetch_add(1, Ordering::Relaxed);
+                let import_name = format!("__oxjest_import_{}__", import_id);
+
+                *stmt = Statement::VariableDeclaration(ctx.ast.alloc(make_dynamic_import(
+                    ctx.ast,
+                    decl,
+                    &import_name,
+                )));
+            })
+        }
     }
 
-    fn visit_expression(&mut self, it: &mut Expression<'a>) {
-        walk_expression(self, it);
-
-        let Expression::CallExpression(call) = it else {
+    fn exit_expression(&mut self, node: &mut Expression<'a>, ctx: &mut TraverseCtx<'a>) {
+        let Expression::CallExpression(call) = node else {
             return;
         };
 
@@ -68,7 +169,7 @@ impl<'a> VisitMut<'a> for HoistMocksVisitor<'a> {
             unreachable!();
         };
 
-        member.property.name = self.ast.atom("unstable_mockModule");
+        member.property.name = ctx.ast.atom("unstable_mockModule");
 
         if call.arguments.len() < 2 {
             let Some(Argument::StringLiteral(lit)) = call.arguments.first() else {
@@ -78,28 +179,18 @@ impl<'a> VisitMut<'a> for HoistMocksVisitor<'a> {
             let id = lit.value.as_str();
 
             call.arguments
-                .push(make_create_mock_factory(self.ast, id).into())
+                .push(make_create_mock_factory(ctx.ast, id).into())
         }
 
-        self.mocks.push(self.ast.move_expression(it));
+        self.mocks.push(ctx.ast.move_expression(node));
     }
 
-    fn visit_statements(&mut self, it: &mut Vec<'a, Statement<'a>>) {
-        walk_statements(self, it);
-
-        it.retain(|stmt| !matches!(stmt, Statement::ExpressionStatement(stmt) if stmt.expression.is_null()));
-    }
-}
-
-pub(crate) struct HoistMocks;
-
-impl Pass for HoistMocks {
-    fn process<'a>(&mut self, program: &mut Program<'a>, ast: AstBuilder<'a>) {
-        HoistMocksVisitor {
-            ast,
-            mocks: Vec::new_in(ast.allocator),
-        }
-        .visit_program(program)
+    fn exit_statements(
+        &mut self,
+        node: &mut ArenaVec<'a, Statement<'a>>,
+        _ctx: &mut TraverseCtx<'a>,
+    ) {
+        node.retain(|stmt| !matches!(stmt, Statement::ExpressionStatement(stmt) if stmt.expression.is_null()));
     }
 }
 
@@ -107,6 +198,7 @@ impl Pass for HoistMocks {
 mod tests {
     use super::*;
     use crate::testing::transform;
+    use oxc::allocator::Allocator;
 
     #[test]
     fn test_hoist_mocks() {
@@ -119,11 +211,12 @@ mod tests {
         }));
         "#;
 
-        let code = transform(source_text, HoistMocks);
+        let allocator = Allocator::new();
+        let code = transform(&allocator, source_text, HoistMocks::new());
 
         insta::assert_snapshot!(code, @r#"
         jest.unstable_mockModule("./greeter.js", () => ({ greet: () => "Hello, world!" }));
-        import { greet } from "./greeter.js";
+        const __oxjest_import_0__ = await import("./greeter.js"), greet = __oxjest_import_0__.greet;
         "#);
     }
 }
