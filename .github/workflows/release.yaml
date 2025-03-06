@@ -56,8 +56,8 @@ jobs:
       publish: ${{ steps.changesets.outputs.hasChangesets == 'false' }}
 
   publish:
-    needs: release
-    if: ${{ needs.release.outputs.publish }}
     name: Publish
+    needs: release
+    if: ${{ fromJSON(needs.release.outputs.publish) }}
     uses: ./.github/workflows/publish.yaml
     secrets: inherit
