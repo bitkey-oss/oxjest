@@ -1,6 +1,6 @@
-import { greet } from "./greeter";
+import { greet } from "./greeter.ts";
 
-jest.mock("./greeter");
+jest.mock("./greeter.ts");
 
 describe("Simple", () => {
   it("mock a module", () => {

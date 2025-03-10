@@ -6,7 +6,8 @@
     "rootDir": ".",
     "noEmit": true,
     "strict": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "rewriteRelativeImportExtensions": true
   },
   "include": ["src-ts", "tests"]
 }

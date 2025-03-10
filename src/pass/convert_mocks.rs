@@ -10,6 +10,7 @@ use oxc::ast::ast::{
 use oxc::span::GetSpan;
 use oxc_traverse::{Traverse, TraverseCtx};
 
+use crate::jest::is_jest_do_mock_call;
 use crate::jest::is_jest_mock_call;
 
 fn make_create_mock_factory<'a>(ast: AstBuilder<'a>, id: &str) -> Expression<'a> {
@@ -160,7 +161,9 @@ impl<'a> Traverse<'a> for ConvertMocks<'a> {
             return;
         };
 
-        if !is_jest_mock_call(call) {
+        let is_jest_mock_call = is_jest_mock_call(call);
+        let is_jest_do_mock_call = is_jest_do_mock_call(call);
+        if !is_jest_mock_call && !is_jest_do_mock_call {
             return;
         }
 
@@ -182,7 +185,10 @@ impl<'a> Traverse<'a> for ConvertMocks<'a> {
                 .push(make_create_mock_factory(ctx.ast, id).into())
         }
 
-        self.mocks.push(ctx.ast.move_expression(node));
+        // only jest.mock needs to be hoisted
+        if is_jest_mock_call {
+            self.mocks.push(ctx.ast.move_expression(node))
+        }
     }
 
     fn exit_statements(
@@ -201,7 +207,7 @@ mod tests {
     use oxc::allocator::Allocator;
 
     #[test]
-    fn test_hoist_mocks() {
+    fn test_mock() {
         let source_text = r#"
         import { greet } from "./greeter.js";
 
@@ -215,8 +221,64 @@ mod tests {
         let code = transform(&allocator, source_text, ConvertMocks::new());
 
         insta::assert_snapshot!(code, @r#"
-        jest.unstable_mockModule("./greeter.js", () => ({ greet: () => "Hello, world!" }));
+        jest.unstable_mockModule("./greeter", () => ({ greet: () => "Hello, world!" }));
+        const __oxjest_import_0__ = await import("./greeter.ts"), greet = __oxjest_import_0__.greet;
+        "#);
+    }
+
+    #[test]
+    fn test_mock_auto() {
+        let source_text = r#"
+        import { greet } from "./greeter.js";
+
+        // this mocking needs to be hoisted to the top of this module
+        jest.mock("./greeter.js");
+        "#;
+
+        let allocator = Allocator::new();
+        let code = transform(&allocator, source_text, ConvertMocks::new());
+
+        insta::assert_snapshot!(code, @r#"
+        jest.unstable_mockModule("./greeter.js", __oxjest__.createMockFactory(await import("./greeter.js")));
         const __oxjest_import_0__ = await import("./greeter.js"), greet = __oxjest_import_0__.greet;
+        "#);
+    }
+
+    #[test]
+    fn test_do_mock() {
+        let source_text = r#"
+        import { greet } from "./greeter.js";
+
+        // this mocking  does not need to be hoisted to the top of this module
+        jest.doMock("./greeter.js", () => ({
+          greet: () => "Hello, world!",
+        }));
+        "#;
+
+        let allocator = Allocator::new();
+        let code = transform(&allocator, source_text, ConvertMocks::new());
+
+        insta::assert_snapshot!(code, @r#"
+        import { greet } from "./greeter.js";
+        jest.unstable_mockModule("./greeter.js", () => ({ greet: () => "Hello, world!" }));
+        "#);
+    }
+
+    #[test]
+    fn test_do_mock_auto() {
+        let source_text = r#"
+        import { greet } from "./greeter.js";
+
+        // this mocking does not need to be hoisted to the top of this module
+        jest.doMock("./greeter.js");
+        "#;
+
+        let allocator = Allocator::new();
+        let code = transform(&allocator, source_text, ConvertMocks::new());
+
+        insta::assert_snapshot!(code, @r#"
+        import { greet } from "./greeter.js";
+        jest.unstable_mockModule("./greeter.js", __oxjest__.createMockFactory(await import("./greeter.js")));
         "#);
     }
 }
