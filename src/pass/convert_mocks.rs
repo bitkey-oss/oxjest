@@ -113,17 +113,17 @@ fn make_dynamic_import<'a>(
     )
 }
 
-pub(crate) struct HoistMocks<'a> {
+pub(crate) struct ConvertMocks<'a> {
     mocks: Vec<Expression<'a>>,
 }
 
-impl HoistMocks<'_> {
+impl ConvertMocks<'_> {
     pub(crate) fn new() -> Self {
         Self { mocks: Vec::new() }
     }
 }
 
-impl<'a> Traverse<'a> for HoistMocks<'a> {
+impl<'a> Traverse<'a> for ConvertMocks<'a> {
     fn exit_program(&mut self, node: &mut Program<'a>, ctx: &mut TraverseCtx<'a>) {
         // Insert hoisted mocks at the top of the body
         node.body.splice(
@@ -212,7 +212,7 @@ mod tests {
         "#;
 
         let allocator = Allocator::new();
-        let code = transform(&allocator, source_text, HoistMocks::new());
+        let code = transform(&allocator, source_text, ConvertMocks::new());
 
         insta::assert_snapshot!(code, @r#"
         jest.unstable_mockModule("./greeter.js", () => ({ greet: () => "Hello, world!" }));
