@@ -249,7 +249,7 @@ mod tests {
         let source_text = r#"
         import { greet } from "./greeter.js";
 
-        // this mocking  does not need to be hoisted to the top of this module
+        // this mocking does not need to be hoisted
         jest.doMock("./greeter.js", () => ({
           greet: () => "Hello, world!",
         }));
@@ -269,7 +269,7 @@ mod tests {
         let source_text = r#"
         import { greet } from "./greeter.js";
 
-        // this mocking does not need to be hoisted to the top of this module
+        // this mocking does not need to be hoisted
         jest.doMock("./greeter.js");
         "#;
 
