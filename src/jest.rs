@@ -47,3 +47,14 @@ pub fn is_jest_mock_call(expr: &CallExpression) -> bool {
             if is_jest_object(&callee.object) && callee.property.name == MOCK
     )
 }
+
+/// Checks that the call expression is `jest.doMock(...)`.
+pub fn is_jest_do_mock_call(expr: &CallExpression) -> bool {
+    const DO_MOCK: &str = "doMock";
+
+    matches!(
+        &expr.callee,
+        Expression::StaticMemberExpression(callee)
+            if is_jest_object(&callee.object) && callee.property.name == DO_MOCK
+    )
+}
