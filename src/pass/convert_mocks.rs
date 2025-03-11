@@ -221,8 +221,8 @@ mod tests {
         let code = transform(&allocator, source_text, ConvertMocks::new());
 
         insta::assert_snapshot!(code, @r#"
-        jest.unstable_mockModule("./greeter", () => ({ greet: () => "Hello, world!" }));
-        const __oxjest_import_0__ = await import("./greeter.ts"), greet = __oxjest_import_0__.greet;
+        jest.unstable_mockModule("./greeter.js", () => ({ greet: () => "Hello, world!" }));
+        const __oxjest_import_0__ = await import("./greeter.js"), greet = __oxjest_import_0__.greet;
         "#);
     }
 

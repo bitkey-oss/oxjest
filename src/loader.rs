@@ -4,7 +4,7 @@ use oxc::allocator::Allocator;
 use oxc::ast::ast::Program;
 use oxc::diagnostics::OxcDiagnostic;
 use oxc::parser::{Parser, ParserReturn};
-use oxc::semantic::{ScopeTree, SemanticBuilder, SemanticBuilderReturn, SymbolTable};
+use oxc::semantic::{Scoping, SemanticBuilder, SemanticBuilderReturn};
 use oxc::span::SourceType;
 use oxc::transformer::{DecoratorOptions, TransformOptions, Transformer, TransformerReturn};
 
@@ -16,7 +16,7 @@ impl Loader {
         allocator: &'a Allocator,
         source_text: &'a str,
         source_path: impl AsRef<Path>,
-    ) -> Result<(Program<'a>, SymbolTable, ScopeTree), Vec<OxcDiagnostic>> {
+    ) -> Result<(Program<'a>, Scoping), Vec<OxcDiagnostic>> {
         let source_path = source_path.as_ref();
         let source_type = SourceType::from_path(source_path).unwrap();
 
@@ -36,7 +36,7 @@ impl Loader {
             return Err(errors);
         }
 
-        let (symbols, scopes) = semantic.into_symbol_table_and_scope_tree();
+        let scoping = semantic.into_scoping();
         let options = TransformOptions {
             decorator: DecoratorOptions {
                 legacy: true,
@@ -46,19 +46,13 @@ impl Loader {
         };
 
         let TransformerReturn {
-            errors,
-            symbols,
-            scopes,
-            ..
-        } = Transformer::new(allocator, source_path, &options).build_with_symbols_and_scopes(
-            symbols,
-            scopes,
-            &mut program,
-        );
+            errors, scoping, ..
+        } = Transformer::new(allocator, source_path, &options)
+            .build_with_scoping(scoping, &mut program);
         if !errors.is_empty() {
             return Err(errors);
         }
 
-        Ok((program, symbols, scopes))
+        Ok((program, scoping))
     }
 }

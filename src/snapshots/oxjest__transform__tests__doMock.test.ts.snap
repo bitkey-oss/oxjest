@@ -1,0 +1,26 @@
+---
+source: src/transform.rs
+expression: code
+---
+import * as __oxjest__ from "oxjest/runtime";
+describe("doMock", () => {
+	beforeEach(() => {
+		import.meta.jest.resetModules();
+	});
+	it("mock a module first", async () => {
+		import.meta.jest.unstable_mockModule("./greeter.ts", () => {
+			return { greet: import.meta.jest.fn(() => "Hello from first mocked module!") };
+		});
+		const { greet } = await import("./greeter.ts");
+		expect(greet()).toBe("Hello from first mocked module!");
+	});
+	it("mock a module second", async () => {
+		import.meta.jest.unstable_mockModule("./greeter.ts", () => {
+			return { greet: import.meta.jest.fn(() => "Hello from second mocked module!") };
+		});
+		const { greet } = await import("./greeter.ts");
+		expect(greet()).toBe("Hello from second mocked module!");
+	});
+});
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6W10sInNvdXJjZXMiOlsiZG9Nb2NrLnRlc3QudHMiXSwibWFwcGluZ3MiOiI7QUFBQSxTQUFTLFVBQVUsTUFBTTtBQUN2QixZQUFXLE1BQU07QUFDZixtQkFBSyxjQUFjO0NBQ3BCLEVBQUM7QUFFRixJQUFHLHVCQUF1QixZQUFZO0FBQ3BDLG1CQUFLLG9CQUFPLGdCQUFnQixNQUFNO0FBQ2hDLFVBQU8sRUFDTCxPQUFPLGlCQUFLLEdBQUcsTUFBTSxrQ0FBa0MsQ0FDeEQ7RUFDRixFQUFDO0VBQ0YsTUFBTSxFQUFFLE9BQU8sR0FBRyxNQUFNLE9BQU87QUFFL0IsU0FBTyxPQUFPLENBQUMsQ0FBQyxLQUFLLGtDQUFrQztDQUN4RCxFQUFDO0FBRUYsSUFBRyx3QkFBd0IsWUFBWTtBQUNyQyxtQkFBSyxvQkFBTyxnQkFBZ0IsTUFBTTtBQUNoQyxVQUFPLEVBQ0wsT0FBTyxpQkFBSyxHQUFHLE1BQU0sbUNBQW1DLENBQ3pEO0VBQ0YsRUFBQztFQUNGLE1BQU0sRUFBRSxPQUFPLEdBQUcsTUFBTSxPQUFPO0FBRS9CLFNBQU8sT0FBTyxDQUFDLENBQUMsS0FBSyxtQ0FBbUM7Q0FDekQsRUFBQztBQUNILEVBQUMifQ==

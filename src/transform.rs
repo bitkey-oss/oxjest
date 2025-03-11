@@ -18,13 +18,13 @@ pub(crate) fn _transform(
 ) -> Result<crate::TransformedSource> {
     let source_path = PathBuf::from(source_path);
     let allocator = Allocator::new();
-    let (mut program, symbols, scopes) = Loader
+    let (mut program, scoping) = Loader
         .load_str(&allocator, &source_text, &source_path)
         .map_err(|_| Error::from_reason("Could not load a source file. Invalid syntax?"))?;
 
     let mut transformer = Transformer::new();
 
-    traverse_mut(&mut transformer, &allocator, &mut program, symbols, scopes);
+    traverse_mut(&mut transformer, &allocator, &mut program, scoping);
 
     let CodegenReturn { mut code, map, .. } = CodeGenerator::new()
         .with_options(CodegenOptions {

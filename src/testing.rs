@@ -15,11 +15,11 @@ pub(crate) fn transform<'a>(
     let source_path = PathBuf::from_str("/path/to/source.js").unwrap();
 
     let source_text = allocator.alloc_str(source_text);
-    let (mut program, symbols, scopes) = Loader
+    let (mut program, scoping) = Loader
         .load_str(&allocator, source_text, &source_path)
         .unwrap();
 
-    traverse_mut(&mut traverser, &allocator, &mut program, symbols, scopes);
+    traverse_mut(&mut traverser, &allocator, &mut program, scoping);
 
     let CodegenReturn { code, .. } = CodeGenerator::new()
         .with_options(Default::default())
