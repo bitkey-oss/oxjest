@@ -1,5 +1,13 @@
 # oxjest
 
+## 0.1.3
+
+### Patch Changes
+
+- [#13](https://github.com/bitkey-oss/oxjest/pull/13) [`4f643ce`](https://github.com/bitkey-oss/oxjest/commit/4f643cea3dd99a02ee675ddf71dec4940530259c) Thanks [@tmaruyama-bitkey](https://github.com/tmaruyama-bitkey)! - Support jest.doMock
+
+- [#15](https://github.com/bitkey-oss/oxjest/pull/15) [`54594eb`](https://github.com/bitkey-oss/oxjest/commit/54594ebe80e0be063db0997a8d1a5b3cec3435c6) Thanks [@siketyan](https://github.com/siketyan)! - Upgraded Oxc to v0.57.0.
+
 ## 0.1.2
 
 ### Patch Changes
