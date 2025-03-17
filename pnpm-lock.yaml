@@ -21,8 +21,8 @@ importers:
         specifier: ^0.2.7
         version: 0.2.7
       '@oxc-project/runtime':
-        specifier: ^0.57.0
-        version: 0.57.0
+        specifier: ^0.58.1
+        version: 0.58.1
       jest:
         specifier: ^29.7.0 || ^30.0.0-alpha.7
         version: 29.7.0(@types/node@22.13.8)
@@ -954,8 +954,8 @@ packages:
   '@octokit/types@13.8.0':
     resolution: {integrity: sha512-x7DjTIbEpEWXK99DMd01QfWy0hd5h4EN+Q7shkdKds3otGQP+oWE/y0A76i1OvH9fygo4ddvNf7ZvF0t78P98A==}
 
-  '@oxc-project/runtime@0.57.0':
-    resolution: {integrity: sha512-ib1XYIU+M1xXTW3vauJ7M+nwSgt9pe1lnnE9bicyxOwyATW1MKVXOeRUMD+t1rKkM/mfFIvDgcjMDSd4DwUpOA==}
+  '@oxc-project/runtime@0.58.1':
+    resolution: {integrity: sha512-xKuEaTrsaLSuYTItOBcEmTQRAsFKq9e30iiexIZQRSzDOJPi0oDbyNjKjIxasTZ/WuLduj8tkweXifX/i/7A/g==}
     engines: {node: '>=6.9.0'}
 
   '@sinclair/typebox@0.27.8':
@@ -3103,7 +3103,7 @@ snapshots:
     dependencies:
       '@octokit/openapi-types': 23.0.1
 
-  '@oxc-project/runtime@0.57.0': {}
+  '@oxc-project/runtime@0.58.1': {}
 
   '@sinclair/typebox@0.27.8': {}
 
