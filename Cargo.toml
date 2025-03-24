@@ -12,14 +12,14 @@ base64 = "0.22.1"
 napi = "3.0.0-alpha.33"
 napi-derive = "3.0.0-alpha.29"
 oxc_sourcemap = "3.0.0"
-oxc_traverse = "0.60.0"
+oxc_traverse = "0.61.2"
 
 [dependencies.oxc]
-version = "0.60.0"
+version = "0.61.2"
 features = ["ast_visit", "codegen", "semantic", "transformer"]
 
 [build-dependencies]
-napi-build = "2.1.5"
+napi-build = "2.1.6"
 
 [dev-dependencies]
 insta = "1.42.2"
