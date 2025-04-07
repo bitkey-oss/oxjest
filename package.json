@@ -40,7 +40,7 @@
   "peerDependencies": {
     "@jest/globals": "^29.7.0 || ^30.0.0-alpha.7",
     "@jest/transform": "^29.7.0 || ^30.0.0-alpha.7",
-    "@oxc-project/runtime": "^0.61.2",
+    "@oxc-project/runtime": "^0.62.0",
     "jest": "^29.7.0 || ^30.0.0-alpha.7"
   },
   "scripts": {
