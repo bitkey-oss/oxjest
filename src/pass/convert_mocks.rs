@@ -1,7 +1,7 @@
 use std::iter::once;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
-use oxc::allocator::{Box, CloneIn, Vec as ArenaVec};
+use oxc::allocator::{Box, CloneIn, TakeIn, Vec as ArenaVec};
 use oxc::ast::AstBuilder;
 use oxc::ast::ast::{
     Argument, BindingPatternKind, Expression, ImportDeclaration, ImportDeclarationSpecifier,
@@ -187,7 +187,7 @@ impl<'a> Traverse<'a> for ConvertMocks<'a> {
 
         // only jest.mock needs to be hoisted
         if is_jest_mock_call {
-            self.mocks.push(ctx.ast.move_expression(node))
+            self.mocks.push(node.take_in(ctx.ast.allocator));
         }
     }
 
