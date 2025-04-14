@@ -1,6 +1,6 @@
 {
   "name": "oxjest",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Advanced native ESM support for Jest, built on top of Oxc.",
   "author": {
     "name": "Bitkey, Inc."
