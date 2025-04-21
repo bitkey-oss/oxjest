@@ -40,7 +40,7 @@ impl<'a> Traverse<'a> for ImportActual<'a> {
                         ctx.ast.expression_import(
                             Span::default(),
                             ctx.ast.expression_string_literal(Span::default(), id, None),
-                            ctx.ast.vec(),
+                            None,
                             None,
                         ),
                     );

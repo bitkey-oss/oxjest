@@ -30,7 +30,7 @@ fn make_create_mock_factory<'a>(ast: AstBuilder<'a>, id: &str) -> Expression<'a>
                 ast.expression_import(
                     Span::default(),
                     ast.expression_string_literal(Span::default(), id, None),
-                    ast.vec(),
+                    None,
                     None,
                 ),
             )
@@ -59,7 +59,7 @@ fn make_dynamic_import<'a>(
             ast.expression_import(
                 Span::default(),
                 ast.expression_string_literal(decl.source.span, decl.source.value, decl.source.raw),
-                ast.vec(),
+                None,
                 None,
             ),
         )),
