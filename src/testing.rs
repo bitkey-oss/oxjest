@@ -2,7 +2,7 @@ use std::path::PathBuf;
 use std::str::FromStr;
 
 use oxc::allocator::Allocator;
-use oxc::codegen::{CodeGenerator, CodegenReturn};
+use oxc::codegen::{Codegen, CodegenReturn};
 use oxc_traverse::{Traverse, traverse_mut};
 
 use crate::loader::Loader;
@@ -21,7 +21,7 @@ pub(crate) fn transform<'a>(
 
     traverse_mut(&mut traverser, &allocator, &mut program, scoping);
 
-    let CodegenReturn { code, .. } = CodeGenerator::new()
+    let CodegenReturn { code, .. } = Codegen::new()
         .with_options(Default::default())
         .build(&program);
 
