@@ -5,7 +5,7 @@ use base64::Engine;
 use base64::prelude::BASE64_STANDARD;
 use napi::bindgen_prelude::*;
 use oxc::allocator::Allocator;
-use oxc::codegen::{CodeGenerator, CodegenOptions, CodegenReturn};
+use oxc::codegen::{Codegen, CodegenOptions, CodegenReturn};
 use oxc_sourcemap::SourceMap;
 use oxc_traverse::traverse_mut;
 
@@ -26,7 +26,7 @@ pub(crate) fn _transform(
 
     traverse_mut(&mut transformer, &allocator, &mut program, scoping);
 
-    let CodegenReturn { mut code, map, .. } = CodeGenerator::new()
+    let CodegenReturn { mut code, map, .. } = Codegen::new()
         .with_options(CodegenOptions {
             source_map_path: Some(source_path.clone()),
             ..Default::default()

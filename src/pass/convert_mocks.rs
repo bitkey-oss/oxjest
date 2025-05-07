@@ -13,7 +13,7 @@ use oxc_traverse::{Traverse, TraverseCtx};
 use crate::jest::is_jest_do_mock_call;
 use crate::jest::is_jest_mock_call;
 
-fn make_create_mock_factory<'a>(ast: AstBuilder<'a>, id: &str) -> Expression<'a> {
+fn make_create_mock_factory<'a>(ast: AstBuilder<'a>, id: &'a str) -> Expression<'a> {
     ast.expression_call(
         Span::default(),
         ast.member_expression_static(
@@ -43,7 +43,7 @@ fn make_create_mock_factory<'a>(ast: AstBuilder<'a>, id: &str) -> Expression<'a>
 fn make_dynamic_import<'a>(
     ast: AstBuilder<'a>,
     decl: &ImportDeclaration<'a>,
-    import_name: &str,
+    import_name: &'a str,
 ) -> VariableDeclaration<'a> {
     // __oxjest_import_{}__ = await import("...")
     let await_import = ast.variable_declarator(
@@ -150,7 +150,7 @@ impl<'a> Traverse<'a> for ConvertMocks<'a> {
                 *stmt = Statement::VariableDeclaration(ctx.ast.alloc(make_dynamic_import(
                     ctx.ast,
                     decl,
-                    &import_name,
+                    ctx.ast.str(&import_name),
                 )));
             })
         }
