@@ -260,6 +260,7 @@ mod tests {
 
         insta::assert_snapshot!(code, @r#"
         import { greet } from "./greeter.js";
+        // this mocking does not need to be hoisted
         jest.unstable_mockModule("./greeter.js", () => ({ greet: () => "Hello, world!" }));
         "#);
     }
@@ -278,6 +279,7 @@ mod tests {
 
         insta::assert_snapshot!(code, @r#"
         import { greet } from "./greeter.js";
+        // this mocking does not need to be hoisted
         jest.unstable_mockModule("./greeter.js", __oxjest__.createMockFactory(await import("./greeter.js")));
         "#);
     }

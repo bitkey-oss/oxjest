@@ -42,7 +42,7 @@ pub(crate) fn _transform(
         map.get_names().map(Arc::from).collect(),
         map.get_source_root().map(String::from),
         map.get_sources().map(Arc::from).collect(),
-        None,
+        Vec::new(),
         map.get_tokens().cloned().collect(),
         None,
     );
