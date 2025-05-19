@@ -100,6 +100,7 @@ mod tests {
 
         insta::assert_snapshot!(code, @r#"
         import * as __oxjest__ from "oxjest/runtime";
+        // needs to be import.meta.jest
         import.meta.jest.mock("./greeter.js");
         "#);
     }
