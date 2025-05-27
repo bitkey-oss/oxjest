@@ -1,5 +1,11 @@
 # oxjest
 
+## 0.1.14
+
+### Patch Changes
+
+- [#36](https://github.com/bitkey-oss/oxjest/pull/36) [`5a3069d`](https://github.com/bitkey-oss/oxjest/commit/5a3069d16aa620af5ba4451264b854603926dfb6) Thanks [@siketyan](https://github.com/siketyan)! - Fixed peerDependencies to require @oxc-project/runtime@0.72.0.
+
 ## 0.1.13
 
 ### Patch Changes
