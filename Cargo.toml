@@ -9,17 +9,17 @@ crate-type = ["cdylib"]
 
 [dependencies]
 base64 = "0.22.1"
-napi = "3.0.0-beta.2"
-napi-derive = "3.0.0-beta.2"
+napi = "3.0.0-beta.8"
+napi-derive = "3.0.0-beta.8"
 oxc_sourcemap = "3.0.2"
-oxc_traverse = "0.72.0"
+oxc_traverse = "0.73.0"
 
 [dependencies.oxc]
-version = "0.72.0"
+version = "0.73.0"
 features = ["ast_visit", "codegen", "semantic", "transformer"]
 
 [build-dependencies]
-napi-build = "2.2.0"
+napi-build = "3.0.0-beta.0"
 
 [dev-dependencies]
 insta = "1.43.1"
