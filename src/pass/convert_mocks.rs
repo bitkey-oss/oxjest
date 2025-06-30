@@ -124,8 +124,8 @@ impl ConvertMocks<'_> {
     }
 }
 
-impl<'a> Traverse<'a> for ConvertMocks<'a> {
-    fn exit_program(&mut self, node: &mut Program<'a>, ctx: &mut TraverseCtx<'a>) {
+impl<'a, State> Traverse<'a, State> for ConvertMocks<'a> {
+    fn exit_program(&mut self, node: &mut Program<'a>, ctx: &mut TraverseCtx<'a, State>) {
         // Insert hoisted mocks at the top of the body
         node.body.splice(
             0..0,
@@ -145,7 +145,7 @@ impl<'a> Traverse<'a> for ConvertMocks<'a> {
                 };
 
                 let import_id = import_id.fetch_add(1, Ordering::Relaxed);
-                let import_name = format!("__oxjest_import_{}__", import_id);
+                let import_name = format!("__oxjest_import_{import_id}__");
 
                 *stmt = Statement::VariableDeclaration(ctx.ast.alloc(make_dynamic_import(
                     ctx.ast,
@@ -156,7 +156,7 @@ impl<'a> Traverse<'a> for ConvertMocks<'a> {
         }
     }
 
-    fn exit_expression(&mut self, node: &mut Expression<'a>, ctx: &mut TraverseCtx<'a>) {
+    fn exit_expression(&mut self, node: &mut Expression<'a>, ctx: &mut TraverseCtx<'a, State>) {
         let Expression::CallExpression(call) = node else {
             return;
         };
@@ -194,7 +194,7 @@ impl<'a> Traverse<'a> for ConvertMocks<'a> {
     fn exit_statements(
         &mut self,
         node: &mut ArenaVec<'a, Statement<'a>>,
-        _ctx: &mut TraverseCtx<'a>,
+        _ctx: &mut TraverseCtx<'a, State>,
     ) {
         node.retain(|stmt| !matches!(stmt, Statement::ExpressionStatement(stmt) if stmt.expression.is_null()));
     }

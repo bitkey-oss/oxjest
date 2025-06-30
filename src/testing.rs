@@ -10,7 +10,7 @@ use crate::loader::Loader;
 pub(crate) fn transform<'a>(
     allocator: &'a Allocator,
     source_text: &str,
-    mut traverser: impl Traverse<'a>,
+    mut traverser: impl Traverse<'a, ()>,
 ) -> String {
     let source_path = PathBuf::from_str("/path/to/source.js").unwrap();
 
@@ -19,7 +19,7 @@ pub(crate) fn transform<'a>(
         .load_str(&allocator, source_text, &source_path)
         .unwrap();
 
-    traverse_mut(&mut traverser, &allocator, &mut program, scoping);
+    traverse_mut(&mut traverser, &allocator, &mut program, scoping, ());
 
     let CodegenReturn { code, .. } = Codegen::new()
         .with_options(Default::default())
