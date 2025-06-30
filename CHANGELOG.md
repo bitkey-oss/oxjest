@@ -1,5 +1,11 @@
 # oxjest
 
+## 0.1.16
+
+### Patch Changes
+
+- [#40](https://github.com/bitkey-oss/oxjest/pull/40) [`c9cc563`](https://github.com/bitkey-oss/oxjest/commit/c9cc5631adc99c3750365c50cf32ddc8bb8e0ffc) Thanks [@siketyan](https://github.com/siketyan)! - Upgraded Oxc to v0.75.0.
+
 ## 0.1.15
 
 ### Patch Changes
