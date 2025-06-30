@@ -24,7 +24,7 @@ pub(crate) fn _transform(
 
     let mut transformer = Transformer::new();
 
-    traverse_mut(&mut transformer, &allocator, &mut program, scoping);
+    traverse_mut(&mut transformer, &allocator, &mut program, scoping, ());
 
     let CodegenReturn { mut code, map, .. } = Codegen::new()
         .with_options(CodegenOptions {

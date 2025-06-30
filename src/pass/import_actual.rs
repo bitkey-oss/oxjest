@@ -23,8 +23,8 @@ impl ImportActual<'_> {
     }
 }
 
-impl<'a> Traverse<'a> for ImportActual<'a> {
-    fn exit_program(&mut self, node: &mut Program<'a>, ctx: &mut TraverseCtx<'a>) {
+impl<'a, State> Traverse<'a, State> for ImportActual<'a> {
+    fn exit_program(&mut self, node: &mut Program<'a>, ctx: &mut TraverseCtx<'a, State>) {
         if self.modules.is_empty() {
             return;
         }
@@ -68,7 +68,7 @@ impl<'a> Traverse<'a> for ImportActual<'a> {
         node.body.insert(0, decl.into());
     }
 
-    fn exit_expression(&mut self, node: &mut Expression<'a>, ctx: &mut TraverseCtx<'a>) {
+    fn exit_expression(&mut self, node: &mut Expression<'a>, ctx: &mut TraverseCtx<'a, State>) {
         let Expression::CallExpression(call) = node else {
             return;
         };

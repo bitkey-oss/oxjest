@@ -53,15 +53,15 @@ impl InjectGlobals {
     }
 }
 
-impl<'a> Traverse<'a> for InjectGlobals {
-    fn exit_program(&mut self, node: &mut Program<'a>, ctx: &mut TraverseCtx<'a>) {
+impl<'a, State> Traverse<'a, State> for InjectGlobals {
+    fn exit_program(&mut self, node: &mut Program<'a>, ctx: &mut TraverseCtx<'a, State>) {
         node.body.insert(0, make_runtime_import_stmt(ctx.ast));
     }
 
     fn enter_member_expression(
         &mut self,
         node: &mut MemberExpression<'a>,
-        ctx: &mut TraverseCtx<'a>,
+        ctx: &mut TraverseCtx<'a, State>,
     ) {
         let MemberExpression::StaticMemberExpression(expr) = node else {
             return;

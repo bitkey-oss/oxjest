@@ -24,14 +24,14 @@ impl Transformer<'_> {
     }
 }
 
-impl<'a> Traverse<'a> for Transformer<'a> {
-    fn exit_program(&mut self, node: &mut Program<'a>, ctx: &mut TraverseCtx<'a>) {
+impl<'a, State> Traverse<'a, State> for Transformer<'a> {
+    fn exit_program(&mut self, node: &mut Program<'a>, ctx: &mut TraverseCtx<'a, State>) {
         self.convert_mocks.exit_program(node, ctx);
         self.import_actual.exit_program(node, ctx);
         self.inject_globals.exit_program(node, ctx);
     }
 
-    fn exit_expression(&mut self, node: &mut Expression<'a>, ctx: &mut TraverseCtx<'a>) {
+    fn exit_expression(&mut self, node: &mut Expression<'a>, ctx: &mut TraverseCtx<'a, State>) {
         self.convert_mocks.exit_expression(node, ctx);
         self.import_actual.exit_expression(node, ctx);
     }
@@ -39,12 +39,16 @@ impl<'a> Traverse<'a> for Transformer<'a> {
     fn enter_member_expression(
         &mut self,
         node: &mut MemberExpression<'a>,
-        ctx: &mut TraverseCtx<'a>,
+        ctx: &mut TraverseCtx<'a, State>,
     ) {
         self.inject_globals.enter_member_expression(node, ctx);
     }
 
-    fn exit_statements(&mut self, node: &mut Vec<'a, Statement<'a>>, ctx: &mut TraverseCtx<'a>) {
+    fn exit_statements(
+        &mut self,
+        node: &mut Vec<'a, Statement<'a>>,
+        ctx: &mut TraverseCtx<'a, State>,
+    ) {
         self.convert_mocks.exit_statements(node, ctx);
     }
 }
