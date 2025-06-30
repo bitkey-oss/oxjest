@@ -145,7 +145,7 @@ impl<'a, State> Traverse<'a, State> for ConvertMocks<'a> {
                 };
 
                 let import_id = import_id.fetch_add(1, Ordering::Relaxed);
-                let import_name = format!("__oxjest_import_{}__", import_id);
+                let import_name = format!("__oxjest_import_{import_id}__");
 
                 *stmt = Statement::VariableDeclaration(ctx.ast.alloc(make_dynamic_import(
                     ctx.ast,
