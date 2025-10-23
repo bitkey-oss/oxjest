@@ -38,12 +38,12 @@ pub(crate) fn _transform(
 
     // Remove sourcesContent from the sourcemap as larger sources can lead OOM on Node.js
     let map = SourceMap::new(
-        map.get_file().map(Arc::from),
-        map.get_names().map(Arc::from).collect(),
+        map.get_file().map(Arc::clone),
+        map.get_names().map(Arc::clone).collect(),
         map.get_source_root().map(String::from),
-        map.get_sources().map(Arc::from).collect(),
+        map.get_sources().map(Arc::clone).collect(),
         Vec::new(),
-        map.get_tokens().cloned().collect(),
+        map.get_tokens().collect(),
         None,
     );
 
