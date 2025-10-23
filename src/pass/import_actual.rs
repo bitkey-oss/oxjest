@@ -6,7 +6,7 @@ use oxc_traverse::{Traverse, TraverseCtx};
 
 use crate::jest::is_jest_require_actual_call;
 
-fn make_import_name(ast: AstBuilder, index: usize) -> &str {
+fn make_import_name(ast: AstBuilder<'_>, index: usize) -> &str {
     ast.str(&format!("__oxjest_actual_{index}__"))
 }
 
