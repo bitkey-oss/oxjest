@@ -9,20 +9,20 @@ crate-type = ["cdylib"]
 
 [dependencies]
 base64 = "0.22.1"
-napi = "3.3.0"
-napi-derive = "3.2.5"
-oxc_sourcemap = "6.0.0"
-oxc_traverse = "0.95.0"
+napi = "3.7.0"
+napi-derive = "3.4.0"
+oxc_sourcemap = "6.0.1"
+oxc_traverse = "0.103.0"
 
 [dependencies.oxc]
-version = "0.95.0"
+version = "0.103.0"
 features = ["ast_visit", "codegen", "semantic", "transformer"]
 
 [build-dependencies]
-napi-build = "2.2.3"
+napi-build = "2.3.1"
 
 [dev-dependencies]
-insta = "1.43.2"
+insta = "1.44.3"
 test_each_file = "0.3.6"
 
 [profile.dev.package]
