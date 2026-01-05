@@ -166,7 +166,7 @@ function getComponent<T>(metadata: MockMetadata<T>): unknown {
   }
 
   if (metadata.type === "array") {
-    return new Array();
+    return [];
   }
 
   if (metadata.type === "regexp") {

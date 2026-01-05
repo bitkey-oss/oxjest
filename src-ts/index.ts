@@ -1,9 +1,7 @@
 import createCacheKeyFunction from "@jest/create-cache-key-function";
 import type { SyncTransformer, TransformedSource, TransformerFactory } from "@jest/transform";
-
-import { transform } from "../sys/index.js";
-
 import packageJson from "../package.json";
+import { transform } from "../sys/index.js";
 
 const oxjestVersion = packageJson.version;
 const dumpCodeEnabled = !!process.env.OXJEST_DUMP_CODE;
