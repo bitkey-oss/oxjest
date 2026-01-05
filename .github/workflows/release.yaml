@@ -52,6 +52,7 @@ jobs:
           GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
         with:
           setupGitUser: false
+          commitMode: github-api
     outputs:
       publish: ${{ steps.changesets.outputs.hasChangesets == 'false' }}
 
